@@ -38,6 +38,8 @@ var map = L.map('map', {
     }
 }).setView([39.952451,-75.163664], 13);
 
+L.control.layers.autoZIndex = true;
+
 addLayer(L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png', { attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>.' }), null, 'Base Map', 1, null);
 
 addLayer(L.mapbox.tileLayer('banderkat.philly_bikeroutes', {attribution:'Data from City of Philadelphia'}), 
@@ -61,18 +63,19 @@ function addCyclePhillyLayer(purpose, color, index) {
 
     console.log(purpose + ' has color ' + color + ' and index ' + index);
 
-    addLayer(L.tileLayer('http://54.164.180.21/tiles/' + purpose + 
+    addLayer(L.tileLayer('http://54.165.29.118/tiles/' + purpose + 
         '/{z}/{x}/{y}.png', 
         {attribution:'CyclePhilly'}), 
-        L.mapbox.gridLayer('http://54.164.180.21/tiles/' + purpose + '.json'),
+        L.mapbox.gridLayer('http://54.165.29.118/tiles/' + purpose + '.json'),
         purpose, index);
 }
 
 function addLayer(layer, infoLayer, name, zIndex, color) {
     var gridControl = null;
-    layer
-        .setZIndex(zIndex)
-        .addTo(map);
+    layer.addTo(map);
+    if (zIndex == 1) {
+        layer.bringToBack(); // keep base layer at bottom
+    }
         
     if (infoLayer) {
       infoLayer
