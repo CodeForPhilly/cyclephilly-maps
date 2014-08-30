@@ -7,14 +7,19 @@ where points are within a given distance of the start or end points.
 
 import psycopg2
 
-REMOVE_DIST = 200 # remove points within this distance in meters of origin/destination
+REMOVE_DIST = 200  # remove points within this distance in meters of origin/destination
+
+# SQL
+FIND_CMD = 'select ST_DWithin(a.geog, b.geog, %s) from coord_geog a, coord_geog b where a.id=%s and b.id=%s;'
+GET_TRIP_CMD = 'select id from coord_geog where trip_id=%s order by recorded asc;'
+UPDATE_CMD = 'UPDATE trip_geom t SET geom=(SELECT ST_MakeLine(line.geom) FROM (SELECT c.recorded, c.geom FROM coord_geog c WHERE c.trip_id=t.id AND c.id NOT IN %s ORDER BY c.recorded ASC) as line) WHERE t.id=%s;'
 
 """Helper function to delete trip with no accepted co-ordinates"""
 def delete_trip(trip_id):
     c.execute('delete from trip_geom where id=%s;', (trip_id,))
     conn.commit()
 
-"""Helper function to append ids of co-ordinates within REMOVE_DIST
+"""Helper function to get ids of co-ordinates within REMOVE_DIST of first point
    parameters:
    coords -> ordered list of co-ordinate rows for trip, starting at point to check from
    returns:
@@ -23,7 +28,7 @@ def delete_trip(trip_id):
 def find_near(coords):
     skip_ids = []
     for coord in coords:
-        c.execute('select ST_DWithin(a.geog, b.geog, %s) from coord_geog a, coord_geog b where a.id=%s and b.id=%s;', (REMOVE_DIST, start_coord_id, coord[0]))
+        c.execute(FIND_CMD, (REMOVE_DIST, start_coord_id, coord[0]))
         is_near = c.fetchone()[0]
         if is_near:
             trim_start_ct += 1
@@ -43,7 +48,7 @@ print("Have %d trips!" % len(trips))
 
 for trip in trips:
     trip_id = trip[0]
-    c.execute('select id from coord_geog where trip_id=%s order by recorded asc;', (trip_id,))
+    c.execute(GET_TRIP_CMD, (trip_id,))
     coords = c.fetchall()
     coords_ct = len(coords)
     if coords_ct == 0:
@@ -59,7 +64,8 @@ for trip in trips:
     skip_ids = find_near(coords)
     
     if trim_start_ct == coords_ct:
-        print('All %d coordinates in trip #%d are within %d m of the start point.' % (coords_ct, trip_id, REMOVE_DIST))
+        print('All %d coordinates in trip #%d are within %d m of the start point.' %
+              (coords_ct, trip_id, REMOVE_DIST))
         delete_trip(trip_id)
         continue
     else:
@@ -71,17 +77,19 @@ for trip in trips:
     skip_ids.extend(find_near(coords))
             
     if trim_end_ct == coords_ct:
-        print('All %d coordinates in trip #%d are within %d m of the end point.' % (coords_ct, trip_id, REMOVE_DIST))
+        print('All %d coordinates in trip #%d are within %d m of the end point.' %
+              (coords_ct, trip_id, REMOVE_DIST))
         delete_trip(trip_id)
         continue
     elif (trim_start_ct + trim_end_ct) >= coords_ct:
-        print('All coordinates in trip #%d are within %d m of the either the start or the end point.' % (trip_id, REMOVE_DIST))
+        print('All coordinates in trip #%d are within %d m of the either the start or the end point.' %
+              (trip_id, REMOVE_DIST))
         delete_trip(trip_id)
         continue
     
     print('Trimming %d coordinates from end of trip #%d' % (trim_end_ct, trip_id))
     
-    c.execute('UPDATE trip_geom t SET geom=(SELECT ST_MakeLine(line.geom) FROM (SELECT c.recorded, c.geom FROM coord_geog c WHERE c.trip_id=t.id AND c.id NOT IN %s ORDER BY c.recorded ASC) as line) WHERE t.id=%s;', (tuple(skip_ids), trip_id))
+    c.execute(UPDATE_CMD, (tuple(skip_ids), trip_id))
     conn.commit()
     
 conn.close()
