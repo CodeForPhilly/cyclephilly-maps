@@ -28,16 +28,16 @@ var config = {
         var style = '#trip_geom { ' +
             'line-color: #EFF3FF; ' +
             'line-width: 2; ' +
-            '[ purpose = "Commute" ] { line-color: #e41a1c; } ' +
-            '[ purpose = "School" ] { line-color: #377eb8; } ' +
-            '[ purpose = "Exercise" ] { line-color: #4daf4a; } ' +
-            '[ purpose = "Social" ] { line-color: #984ea3; } ' +
-            '[ purpose = "Other" ] { line-color: #ff7f00; } ' +
-            '[ purpose = "other" ] { line-color: #ff7f00; } ' +
-            '[ purpose = "Work-related" ] { line-color: #ffff33; } ' +
-            '[ purpose = "Work-Related" ] { line-color: #ffff33; } ' +
-            '[ purpose = "Errand" ] { line-color: #f781bf; } ' +
-            '[ purpose = "Shopping" ] { line-color: #999999; } ' +
+            '[ purpose = "Commute" ] { line-color: #256baf; } ' +
+            '[ purpose = "School" ] { line-color: #dfdeb6; } ' +
+            '[ purpose = "Exercise" ] { line-color: #16ac69; } ' +
+            '[ purpose = "Social" ] { line-color: #ccd93e; } ' +
+            '[ purpose = "Other" ] { line-color: #698ea2; } ' +
+            '[ purpose = "other" ] { line-color: #698ea2; } ' +
+            '[ purpose = "Work-related" ] { line-color: #0a5983; } ' +
+            '[ purpose = "Work-Related" ] { line-color: #0a5983; } ' +
+            '[ purpose = "Errand" ] { line-color: #99cccc; } ' +
+            '[ purpose = "Shopping" ] { line-color: #2487bc; } ' +
             '} ';
 
         req.params.sql = "(select * from trip_geom where purpose ilike '" + 
