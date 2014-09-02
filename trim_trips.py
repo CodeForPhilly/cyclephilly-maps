@@ -13,6 +13,8 @@ REMOVE_DIST = 200  # remove points within this distance in meters of origin/dest
 FIND_CMD = 'select ST_DWithin(a.geog, b.geog, %s) from coord_geog a, coord_geog b where a.id=%s and b.id=%s;'
 GET_TRIP_CMD = 'select id from coord_geog where trip_id=%s order by recorded asc;'
 UPDATE_CMD = 'UPDATE trip_geom t SET geom=(SELECT ST_MakeLine(line.geom) FROM (SELECT c.recorded, c.geom FROM coord_geog c WHERE c.trip_id=t.id AND c.id NOT IN %s ORDER BY c.recorded ASC) as line) WHERE t.id=%s;'
+GET_NEW_COORDS_CMD = 'INSERT INTO coord_geog (trip_id, recorded, geog, geom) (SELECT trip_id, recorded, ST_SetSRID(ST_MakePoint(longitude, latitude), 4326), ST_SetSRID(ST_MakePoint(longitude, latitude), 4326) FROM coord WHERE trip_id > %s);'
+GET_NEW_TRIPS_CMD = 'INSERT INTO trip_geom (id, purpose, start, stop) SELECT id, purpose, start, stop FROM trip WHERE id > %s;'
 
 """Helper function to delete trip with no accepted co-ordinates"""
 def delete_trip(trip_id):
@@ -31,7 +33,6 @@ def find_near(coords):
         c.execute(FIND_CMD, (REMOVE_DIST, start_coord_id, coord[0]))
         is_near = c.fetchone()[0]
         if is_near:
-            trim_start_ct += 1
             skip_ids.append(coord[0])
         else:
             break
@@ -41,7 +42,15 @@ def find_near(coords):
 conn = psycopg2.connect('dbname=cyclephilly')
 c = conn.cursor()
 
-c.execute('select id from trip_geom;')
+# first get new trip data ready
+c.execute('SELECT max(id) FROM trip_geom;')
+max_id = c.fetchone()[0]
+c.execute('TRUNCATE coord_geog;')
+c.execute(GET_NEW_COORDS_CMD, (max_id,))
+c.execute(GET_NEW_TRIPS_CMD, (max_id,))
+
+# now get the new trips and process them
+c.execute('SELECT id FROM trip_geom WHERE ID > %s;', (max_id,))
 trips = c.fetchall()
 
 print("Have %d trips!" % len(trips))
@@ -60,8 +69,8 @@ for trip in trips:
     end_coord_id = coords[coords_ct-1][0]
     
     # trim from start
-    trim_start_ct = 0
     skip_ids = find_near(coords)
+    trim_start_ct = len(skip_ids)
     
     if trim_start_ct == coords_ct:
         print('All %d coordinates in trip #%d are within %d m of the start point.' %
@@ -72,9 +81,10 @@ for trip in trips:
         print('Trimming %d coordinates from start of trip #%d' % (trim_start_ct, trip_id))
                 
     # trim from end
-    trim_end_ct = 0
     coords.reverse()
-    skip_ids.extend(find_near(coords))
+    skip_end_ids = find_near(coords)
+    trim_end_ct = len(skip_end_ids)
+    skip_ids.extend(skip_end_ids)
             
     if trim_end_ct == coords_ct:
         print('All %d coordinates in trip #%d are within %d m of the end point.' %
