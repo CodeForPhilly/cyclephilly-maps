@@ -14,9 +14,19 @@
   <style>
     body { margin:0; padding:0; }
     #map { position:absolute; top:0; bottom:0; width:100%; }
+    ul.scroll-menu {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        -moz-overflow-scrolling: touch;
+        -ms-overflow-scrolling: touch;
+        -o-overflow-scrolling: touch;
+        overflow-scrolling: touch;
+        width:175px;
+        height: auto;
+        max-height: 400px;
+    }
     #layers { position:relative; float:right; top:15px; right:15px; font-size:12px; 
               z-index:999; font-weight:bold; }
-    #layeritem { width:300px; }
     .Commute { background-color:#256baf; }
     .School { background-color:#dfdeb6; }
     .Exercise { background-color:#16ac69; }
@@ -33,7 +43,7 @@
     <button class="btn btn-default dropdown-toggle" type="button" 
       id="dropdownMenu" data-toggle="dropdown">Layers <span class="caret"></span>
     </button>
-    <ul id='map-ui' class="list-group dropdown-menu nav nav-pills nav-stacked" role="menu" aria-labelledby="dropdownMenu">
+    <ul id='map-ui' class="scroll-menu list-group dropdown-menu nav nav-pills nav-stacked" role="menu" aria-labelledby="dropdownMenu">
     </ul>
   </div>
 </div>
@@ -131,6 +141,7 @@ function addLayer(layer, infoLayer, name, zIndex, color) {
     item.appendChild(link);
     ui.appendChild(item);
 }
+$('ul.scroll-menu').css('max-height', $(window).height() - 60);
 </script>
 </body>
 </html>
