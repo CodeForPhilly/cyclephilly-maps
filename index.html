@@ -14,9 +14,27 @@
   <style>
     body { margin:0; padding:0; }
     #map { position:absolute; top:0; bottom:0; width:100%; }
+    ul.scroll-menu {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        -moz-overflow-scrolling: touch;
+        -ms-overflow-scrolling: touch;
+        -o-overflow-scrolling: touch;
+        overflow-scrolling: touch;
+        width:175px;
+        height: auto;
+        max-height: 400px;
+    }
     #layers { position:relative; float:right; top:15px; right:15px; font-size:12px; 
               z-index:999; font-weight:bold; }
-    #layeritem { width:300px; }
+    .Commute { background-color:#256baf; }
+    .School { background-color:#dfdeb6; }
+    .Exercise { background-color:#16ac69; }
+    .Social { background-color:#ccd93e; }
+    .Other { background-color:#698ea2; }
+    .Work-Related { background-color:#0a5983; }
+    .Errand { background-color:#99cccc; }
+    .Shopping { background-color:#2487bc; }
   </style>
 </head>
 <body>
@@ -25,7 +43,7 @@
     <button class="btn btn-default dropdown-toggle" type="button" 
       id="dropdownMenu" data-toggle="dropdown">Layers <span class="caret"></span>
     </button>
-    <ul id='map-ui' class="list-group dropdown-menu nav nav-pills nav-stacked" role="menu" aria-labelledby="dropdownMenu">
+    <ul id='map-ui' class="scroll-menu list-group dropdown-menu nav nav-pills nav-stacked" role="menu" aria-labelledby="dropdownMenu">
     </ul>
   </div>
 </div>
@@ -49,25 +67,21 @@ addLayer(L.tileLayer('http://banderkat.com:8888/v2/bike-circuit/{z}/{x}/{y}.png'
   L.mapbox.gridLayer('http://banderkat.com:8888/v2/bike-circuit.json'), 
   'The Circuit', 3, null);
 
+addCyclePhillyLayer('Commute');
+addCyclePhillyLayer('School');
+addCyclePhillyLayer('Exercise');
+addCyclePhillyLayer('Social');
+addCyclePhillyLayer('Other');
+addCyclePhillyLayer('Work-Related');
+addCyclePhillyLayer('Errand');
+addCyclePhillyLayer('Shopping');
 
-addCyclePhillyLayer('Commute', '#256baf', 4);
-addCyclePhillyLayer('School', '#dfdeb6', 5);
-addCyclePhillyLayer('Exercise', '#16ac69', 6);
-addCyclePhillyLayer('Social', '#ccd93e', 7);
-addCyclePhillyLayer('Other', '#698ea2', 8);
-addCyclePhillyLayer('Work-Related', '#0a5983', 9);
-addCyclePhillyLayer('Errand', '#99cccc', 10);
-addCyclePhillyLayer('Shopping', '#2487bc', 11);
-
-function addCyclePhillyLayer(purpose, color, index) {
-
-    console.log(purpose + ' has color ' + color + ' and index ' + index);
-
+function addCyclePhillyLayer(purpose) {
     addLayer(L.tileLayer('http://54.165.29.118/tiles/' + purpose + 
         '/{z}/{x}/{y}.png', 
         {attribution:'CyclePhilly'}), 
         L.mapbox.gridLayer('http://54.165.29.118/tiles/' + purpose + '.json'),
-        purpose, index);
+        purpose, null);
 }
 
 function addLayer(layer, infoLayer, name, zIndex, color) {
@@ -89,11 +103,10 @@ function addLayer(layer, infoLayer, name, zIndex, color) {
     var link = document.createElement('a');
     link.href = '#';
     link.className = 'active pull-right nav-justified';
-    if (color != null) {
-        link.innerHTML = '<span class="badge pull-left approved"><span class="glyphicon glyphicon-ok"></span></span><span class="pull-right">' + name + '</span>';
-    } else {
-        link.innerHTML = '<span class="badge pull-left approved"><span class="glyphicon glyphicon-ok"></span></span><span class="pull-right">' + name + '</span>';
-    }
+    link.innerHTML = '<span class="badge pull-left approved ' + name + 
+        '"><span class="glyphicon glyphicon-ok"></span></span><span class="pull-right">' + 
+        name + '</span>';
+
     item.setAttribute('role', 'presentation');
     item.className = 'nav-justified';
     link.setAttribute('role', 'menuitem');
@@ -118,17 +131,17 @@ function addLayer(layer, infoLayer, name, zIndex, color) {
               map.addControl(gridControl);
             }
             this.className = 'active pull-right layeritem nav-justified';
-            if (color != null) {
-                this.innerHTML = '<span class="badge pull-left approved"><span class="glyphicon glyphicon-ok"></span></span><span class="pull-right">' + name + '</span>';
-            } else {
-                this.innerHTML = '<span class="badge pull-left approved"><span class="glyphicon glyphicon-ok"></span></span><span class="pull-right">' + name + '</span>';
-            }
+            this.innerHTML = '<span class="badge pull-left approved ' + name + 
+                '"><span class="glyphicon glyphicon-ok"></span></span><span class="pull-right">' + 
+                name + '</span>';
+            
         }
     };
 
     item.appendChild(link);
     ui.appendChild(item);
 }
+$('ul.scroll-menu').css('max-height', $(window).height() - 60);
 </script>
 </body>
 </html>
