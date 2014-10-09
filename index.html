@@ -160,7 +160,7 @@
         addLayer(L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png', { attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>.' }), null, 'Base Map', 1, null);
           
         addLayer(L.tileLayer('http://banderkat.com:8888/v2/bike-circuit/{z}/{x}/{y}.png', 
-            {attribution:'Data from DVRPA'}), null, 'The Circuit', 3, null);
+            {attribution:'Data from DVRPC'}), null, 'The Circuit', 3, null);
 
         addCyclePhillyLayer('Commute');
         addCyclePhillyLayer('School');
@@ -322,7 +322,7 @@
 
         // try HTML5 geolocation
         $(document).ready(function () {
-            map.locate({ setView: true, maxZoom: 16, timeout: 5000 });
+            map.locate({ setView: true, timeout: 5000 });
             markerGroup.addTo(map);
         });
 
