@@ -4,13 +4,13 @@
 <meta charset=utf-8 />
 <title>Philly Cycle Trips Map</title>
   <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
-  <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
-  <script type="text/javascript" src="http://maps.stamen.com/js/tile.stamen.js?v1.2.4"></script>
-  <script src='http://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.js'></script>
-  <link href='http://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css' rel='stylesheet' />
-<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
-<script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script type="text/javascript" src="http://maps.stamen.com/js/tile.stamen.js?v1.3.0"></script>
+  <script src='http://api.tiles.mapbox.com/mapbox.js/v2.2.1/mapbox.js'></script>
+  <link href='http://api.tiles.mapbox.com/mapbox.js/v2.2.1/mapbox.css' rel='stylesheet' />
+<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+<script src="http://netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
   <style>
     body { margin:0; padding:0; }
     #map { position:absolute; top:0; bottom:0; width:100%; }
@@ -60,12 +60,15 @@ L.control.layers.autoZIndex = true;
 
 addLayer(L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png', { attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>.' }), null, 'Base Map', 1, null);
 
+L.mapbox.accessToken = 'pk.eyJ1IjoiYmFuZGVya2F0IiwiYSI6ImVOaHNNa0UifQ.WkAeLdchgBBxJvmZ8tk0Yw';
 addLayer(L.mapbox.tileLayer('banderkat.philly_bikeroutes', {attribution:'Data from City of Philadelphia'}), 
   L.mapbox.gridLayer('banderkat.philly_bikeroutes'), 'Bike Routes', 2, null);
   
 addLayer(L.tileLayer('http://banderkat.com:8888/v2/bike-circuit/{z}/{x}/{y}.png', {attribution:'Data from DVRPC'}), 
   L.mapbox.gridLayer('http://banderkat.com:8888/v2/bike-circuit.json'), 
   'The Circuit', 3, null);
+
+
 
 addCyclePhillyLayer('Commute');
 addCyclePhillyLayer('School');
