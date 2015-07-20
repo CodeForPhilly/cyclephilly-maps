@@ -50,25 +50,32 @@
 <div id='map'></div>
 <script>
 var ui = document.getElementById('map-ui');
-var map = L.map('map', {
-  tileLayer: {
-        detectRetina: true
-    }
-}).setView([39.952451,-75.163664], 13);
+
+L.mapbox.accessToken = 'pk.eyJ1IjoiYmFuZGVya2F0IiwiYSI6ImVOaHNNa0UifQ.WkAeLdchgBBxJvmZ8tk0Yw';
+
+var map = L.mapbox.map('map', 'mapbox.streets')
+//  tileLayer: {
+//        detectRetina: true
+//    }
+//})
+.setView([39.952451,-75.163664], 13);
 
 L.control.layers.autoZIndex = true;
 
-addLayer(L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png', { attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>.' }), null, 'Base Map', 1, null);
+addIndegoStationLayer();
 
-L.mapbox.accessToken = 'pk.eyJ1IjoiYmFuZGVya2F0IiwiYSI6ImVOaHNNa0UifQ.WkAeLdchgBBxJvmZ8tk0Yw';
+/*
+addLayer(L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png', { attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>.' }), null, 'Base Map', 1, null);
+*/
+
+
+/*
 addLayer(L.mapbox.tileLayer('banderkat.philly_bikeroutes', {attribution:'Data from City of Philadelphia'}), 
   L.mapbox.gridLayer('banderkat.philly_bikeroutes'), 'Bike Routes', 2, null);
   
 addLayer(L.tileLayer('http://banderkat.com:8888/v2/bike-circuit/{z}/{x}/{y}.png', {attribution:'Data from DVRPC'}), 
   L.mapbox.gridLayer('http://banderkat.com:8888/v2/bike-circuit.json'), 
   'The Circuit', 3, null);
-
-
 
 addCyclePhillyLayer('Commute');
 addCyclePhillyLayer('School');
@@ -78,6 +85,7 @@ addCyclePhillyLayer('Other');
 addCyclePhillyLayer('Work-Related');
 addCyclePhillyLayer('Errand');
 addCyclePhillyLayer('Shopping');
+*/
 
 function addCyclePhillyLayer(purpose) {
     addLayer(L.tileLayer('http://54.165.29.118/tiles/' + purpose + 
@@ -145,6 +153,46 @@ function addLayer(layer, infoLayer, name, zIndex, color) {
     ui.appendChild(item);
 }
 $('ul.scroll-menu').css('max-height', $(window).height() - 120);
+
+function addIndegoStationLayer() {
+  console.log('getting stations...');
+
+  $.get('https://api.phila.gov/bike-share-stations/v1').done(function(data) {
+      console.log('got stations');
+      var features = $.parseJSON(data);
+      console.log(features);
+      //map.featureLayer.setGeoJSON(features);
+      // L.mapbox.simplestyle.style
+      L.geoJson(features, {style: function(feature) {
+          var iconUrl = 'img/indego' + feature.properties.kioskPublicStatus + '.png';
+          console.log(iconUrl);
+          return { icon: L.icon({iconUrl: iconUrl, iconRetinaUrl: iconUrl, iconSize: [38, 95],
+          iconAnchor: [22, 94],
+          popupAnchor: [-3, -76] }) }
+      }, onEachFeature: function (feature, layer) {
+              layer.bindPopup(getPopup(feature.properties));
+          }}
+     ).addTo(map);
+  }).fail(function(error) {
+      console.error('failed to get Indego stations:');
+      console.log(error);
+  });
+}
+
+
+// TODO: special events, other status-conditional formatting
+function getPopup(properties) {
+    var popup = '<p><b>' + properties.name + '</b></p>';
+    var status = properties.kioskPublicStatus;
+    if (status !== 'Active') {
+        console.log(popup + status);
+        popup += '<p><b>' + status + '</b></p>';
+    } else {
+      popup += '<p>Bikes available: ' + properties.bikesAvailable + '</p>';
+      popup += '<p>Open docks: ' + properties.docksAvailable + '</p>';
+    }
+    return popup;
+}
 </script>
 </body>
 </html>
